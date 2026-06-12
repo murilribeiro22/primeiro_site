@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aventuras na Fazenda!</title>
+    <title>Jogo Espacial - Movimento</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="instrucoes">Use as setas ou WASD para guiar o fazendeiro!</div>
-    
-    <div id="cerca-top" class="cerca"></div>
-    <div id="cerca-bottom" class="cerca"></div>
+    <div id="painel">
+        <div id="instrucoes">Mova com as Setas ou WASD</div>
+        <div id="pontuacao">Pontos: <span id="pontos-valor">0</span></div>
+    </div>
 
-    <div id="fazendeiro"></div>
+    <div id="cenario">
+        <div id="nave">🚀</div>
+        <div id="estrela">⭐</div>
+    </div>
 
     <script src="script.js"></script>
 </body>

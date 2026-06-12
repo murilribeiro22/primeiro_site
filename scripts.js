@@ -1,62 +1,77 @@
-// Seleciona o elemento do fazendeiro
-const fazendeiro = document.getElementById('fazendeiro');
+// Elementos do HTML
+const nave = document.getElementById('nave');
+const estrela = document.getElementById('estrela');
+const pontosValor = document.getElementById('pontos-valor');
+const cenario = document.getElementById('cenario');
 
-// Posição inicial no centro da tela
-let posX = window.innerWidth / 2;
-let posY = window.innerHeight / 2;
-const velocidade = 10; // Pixels por movimento
+// Dimensões do cenário
+const larguraCenario = cenario.clientWidth;
+const alturaCenario = cenario.clientHeight;
 
-// Função para atualizar a posição do fazendeiro na tela
-function atualizarPosicao() {
-    fazendeiro.style.left = posX + 'px';
-    fazendeiro.style.top = posY + 'px';
+// Posição inicial da nave (no centro)
+let naveX = larguraCenario / 2 - 20;
+let naveY = alturaCenario / 2 - 20;
+const velocidade = 20; // Quantos pixels a nave anda por passo
+
+// Pontuação inicial
+let pontos = 0;
+
+// Posições da estrela
+let estrelaX = 0;
+let estrelaY = 0;
+
+// Atualiza a posição visual da nave
+function atualizarNave() {
+    nave.style.left = naveX + 'px';
+    nave.style.top = naveY + 'px';
 }
 
-// Inicializa a posição
-atualizarPosicao();
-
-// Função para checar colisões (evitar que o fazendeiro saia da tela)
-function verificarLimites(novaX, novaY) {
-    const raio = fazendeiro.offsetWidth / 2;
-    // Verifica limites horizontais
-    if (novaX - raio < 0) novaX = raio;
-    if (novaX + raio > window.innerWidth) novaX = window.innerWidth - raio;
+// Move a estrela para um lugar aleatório dentro do cenário
+function moverEstrela Aleatoria() {
+    // Garante que a estrela fique totalmente dentro dos limites
+    estrelaX = Math.floor(Math.random() * (larguraCenario - 40));
+    estrelaY = Math.floor(Math.random() * (alturaCenario - 40));
     
-    // Verifica limites verticais
-    if (novaY - raio < 0) novaY = raio;
-    if (novaY + raio > window.innerHeight) novaY = window.innerHeight - raio;
-
-    return { x: novaX, y: novaY };
+    estrela.style.left = estrelaX + 'px';
+    estrela.style.top = estrelaY + 'px';
 }
 
-// Escuta o pressionamento de teclas
+// Função que checa se a nave encostou na estrela (Colisão)
+function checarColisao() {
+    // Cria caixas virtuais em volta dos objetos para calcular a distância
+    const distX = Math.abs((naveX + 20) - (estrelaX + 15));
+    const distY = Math.abs((naveY + 20) - (estrelaY + 15));
+
+    // Se estiverem muito próximos, houve colisão
+    if (distX < 35 && distY < 35) {
+        pontos++;
+        pontosValor.textContent = pontos; // Atualiza o placar
+        moverEstrelaAleatoria(); // Muda a estrela de lugar
+    }
+}
+
+// Escuta os comandos do teclado
 window.addEventListener('keydown', (event) => {
     const tecla = event.key.toLowerCase();
-    
-    // Calcula a nova posição pretendida
-    let novaX = posX;
-    let novaY = posY;
 
-    // Movimento para Cima (W ou Seta Cima)
-    if (tecla === 'arrowup' || tecla === 'w') {
-        novaY -= velocidade;
+    // Movimentos e barreiras para não sair do cenário
+    if ((tecla === 'arrowleft' || tecla === 'a') && naveX > 0) {
+        naveX -= velocidade;
     }
-    // Movimento para Baixo (S ou Seta Baixo)
-    if (tecla === 'arrowdown' || tecla === 's') {
-        novaY += velocidade;
+    if ((tecla === 'arrowright' || tecla === 'd') && naveX < larguraCenario - 40) {
+        naveX += velocidade;
     }
-    // Movimento para Esquerda (A ou Seta Esquerda)
-    if (tecla === 'arrowleft' || tecla === 'a') {
-        novaX -= velocidade;
+    if ((tecla === 'arrowup' || tecla === 'w') && naveY > 0) {
+        naveY -= velocidade;
     }
-    // Movimento para Direita (D ou Seta Direita)
-    if (tecla === 'arrowright' || tecla === 'd') {
-        novaX += velocidade;
+    if ((tecla === 'arrowdown' || tecla === 's') && naveY < alturaCenario - 45) {
+        naveY += velocidade;
     }
 
-    // Aplica os limites e atualiza a posição final
-    const posicaoLimitada = verificarLimites(novaX, novaY);
-    posX = posicaoLimitada.x;
-    posY = posicaoLimitada.y;
-    atualizarPosicao();
+    atualizarNave();
+    checarColisao();
 });
+
+// Inicializa o jogo posicionando os elementos
+atualizarNave();
+moverEstrelaAleatoria();
