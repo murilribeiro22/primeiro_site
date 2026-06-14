@@ -1,117 +1,100 @@
-// Grade estática 5x5
-// 0 = Espaço vazio, 1 = Obstáculo fixo, 2 = Bloco Destino
-const gridMap = [
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 1, 1, 1, 0],
-    [2, 0, 0, 0, 0]
-];
+// Estados do jogo
+let hasKey = false;
+let gateOpen = false;
+let hasHarvest = false;
+let gameOver = false;
 
-let playerBlock = { r: 0, c: 0 };
-let seedBlock = { r: 0, c: 4 };
+const itemDisplay = document.getElementById('item-held');
+const msg = document.getElementById('message');
 
-let hasSeed = false;
-let moveCount = 0;
-let isFinished = false;
+function interact(element) {
+    if (gameOver) return;
 
-function initGame() {
-    playerBlock = { r: 0, c: 0 };
-    seedBlock = { r: 0, c: 4 };
-    hasSeed = false;
-    moveCount = 0;
-    isFinished = false;
-
-    document.getElementById('message').innerText = "";
-    document.getElementById('moves-display').innerText = moveCount;
-    document.getElementById('cargo-display').innerText = "Nenhuma";
-    
-    drawGrid();
-}
-
-function drawGrid() {
-    const grid = document.getElementById('farm-grid');
-    grid.innerHTML = '';
-
-    for (let r = 0; r < 5; r++) {
-        for (let c = 0; c < 5; c++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-
-            // Verifica o posicionamento dos blocos com prioridades
-            if (playerBlock.r === r && playerBlock.c === c) {
-                cell.classList.add('player');
-            } else if (seedBlock.r === r && seedBlock.c === c && !hasSeed) {
-                cell.classList.add('seed');
-            } else if (gridMap[r][c] === 1) {
-                cell.classList.add('wall');
-            } else if (gridMap[r][c] === 2) {
-                cell.classList.add('target');
-            }
-
-            grid.appendChild(cell);
-        }
-    }
-}
-
-window.addEventListener('keydown', function(e) {
-    if (isFinished) return;
-
-    let nextR = playerBlock.r;
-    let nextC = playerBlock.c;
-    const key = e.key.toLowerCase();
-    let isMoved = false;
-
-    if (key === 'arrowup' || key === 'w') nextR--;
-    else if (key === 'arrowdown' || key === 's') nextR++;
-    else if (key === 'arrowleft' || key === 'a') nextC--;
-    else if (key === 'arrowright' || key === 'd') nextC++;
-    else return;
-
-    // Validação física de colisão de blocos
-    if (nextR >= 0 && nextR < 5 && nextC >= 0 && nextC < 5) {
-        if (gridMap[nextR][nextC] !== 1) {
-            playerBlock.r = nextR;
-            playerBlock.c = nextC;
-            isMoved = true;
-        }
-    }
-
-    if (isMoved) {
-        moveCount++;
-        document.getElementById('moves-display').innerText = moveCount;
-        checkLogic();
-        drawGrid();
-    }
-});
-
-function checkLogic() {
-    const msg = document.getElementById('message');
-
-    // Sobreposição com o Bloco Semente
-    if (playerBlock.r === seedBlock.r && playerBlock.c === seedBlock.c && !hasSeed) {
-        hasSeed = true;
-        document.getElementById('cargo-display').innerText = "Semente [Conectado]";
-        msg.innerText = "Bloco de semente acoplado.";
-        msg.style.color = "#2196f3";
-    }
-
-    // Sobreposição com o Bloco Destino
-    if (gridMap[playerBlock.r][playerBlock.c] === 2) {
-        if (hasSeed) {
-            msg.innerText = "SUCESSO: Conexão concluída!";
-            msg.style.color = "#4caf50";
-            isFinished = true;
+    // 1. Interação com o Galpão (Pegar a chave)
+    if (element === 'shed') {
+        if (!hasKey && !gateOpen) {
+            hasKey = true;
+            itemDisplay.innerText = "Chave do Portão 🔑";
+            msg.innerText = "Você encontrou a chave antiga do portão!";
+            msg.style.color = "#00796b";
         } else {
-            msg.innerText = "AVISO: Destino exige semente.";
-            msg.style.color = "#795548";
+            msg.innerText = "Não há mais nada útil no galpão.";
+            msg.style.color = "#757575";
+        }
+    }
+
+    // 2. Interação com o Portão (O obstáculo principal)
+    else if (element === 'gate') {
+        if (gateOpen) {
+            msg.innerText = "O portão já está aberto.";
+            msg.style.color = "#757575";
+        } else if (hasKey) {
+            gateOpen = true;
+            hasKey = false;
+            itemDisplay.innerText = "Vazio";
+            
+            // Modifica o estado visual do portão
+            document.getElementById('gate-emoji').innerText = '🔓';
+            document.getElementById('gate-label').innerText = "Cerca Aberta";
+            
+            // Remove o bloqueio visual do próximo estágio (Plantação)
+            document.getElementById('field').classList.remove('blocked');
+            
+            msg.innerText = "Você destrancou o portão! O caminho para as plantas está livre.";
+            msg.style.color = "#2e7d32";
+        } else {
+            msg.innerText = "❌ Caminho bloqueado! O portão está trancado. Procure a chave.";
+            msg.style.color = "#c62828";
+        }
+    }
+
+    // 3. Interação com a Plantação (Só funciona se o portão for aberto)
+    else if (element === 'field') {
+        if (!gateOpen) {
+            msg.innerText = "🔒 Obstáculo: Você não consegue alcançar as plantas com o portão fechado!";
+            msg.style.color = "#c62828";
+        } else if (!hasHarvest) {
+            hasHarvest = true;
+            itemDisplay.innerText = "Caixa de Vegetais 📦";
+            msg.innerText = "Você colheu os vegetais frescos!";
+            msg.style.color = "#ef6c00";
+            
+            // Desbloqueia o caminhão
+            document.getElementById('truck').classList.remove('blocked');
+        } else {
+            msg.innerText = "A área já foi totalmente colhida.";
+            msg.style.color = "#757575";
+        }
+    }
+
+    // 4. Interação com o Caminhão (Fim do Puzzle)
+    else if (element === 'truck') {
+        if (!hasHarvest) {
+            msg.innerText = "🔒 Obstáculo: O caminhão não vai sair sem a carga de vegetais!";
+            msg.style.color = "#c62828";
+        } else {
+            itemDisplay.innerText = "Missão Cumprida!";
+            msg.innerText = "🎉 Vitória! Você carregou o caminhão e concluiu a logística da fazenda!";
+            msg.style.color = "#2e7d32";
+            gameOver = true;
         }
     }
 }
 
 function resetGame() {
-    initGame();
+    hasKey = false;
+    gateOpen = false;
+    hasHarvest = false;
+    gameOver = false;
+    
+    itemDisplay.innerText = "Vazio";
+    msg.innerText = "Progresso reiniciado.";
+    msg.style.color = "#000";
+    
+    document.getElementById('gate-emoji').innerText = '🔒';
+    document.getElementById('gate-label').innerText = "Cerca Trancada";
+    
+    // Readiciona as classes de bloqueio visual
+    document.getElementById('field').classList.add('blocked');
+    document.getElementById('truck').classList.add('blocked');
 }
-
-// Inicialização automática
-initGame();

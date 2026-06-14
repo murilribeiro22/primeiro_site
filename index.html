@@ -3,27 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzle de Blocos: Fazenda</title>
+    <title>Fazenda Puzzle: Obstáculos</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
-        <h1>Logística Agrícola: Movimento de Blocos</h1>
+        <h1>Fazenda Point & Click: Obstáculos</h1>
+        <p class="instructions">Clique nos locais para avançar. Resolva os obstáculos para liberar o caminho!</p>
         
-        <div class="status-panel">
-            <div>Movimentos: <span id="moves-display">0</span></div>
-            <div>Carga: <span id="cargo-display">Nenhuma</span></div>
-        </div>
-        
-        <div id="farm-grid"></div>
-
-        <div class="legend">
-            <div><span class="box-legend player-box"></span> Bloco Trator</div>
-            <div><span class="box-legend seed-box"></span> Bloco Semente</div>
-            <div><span class="box-legend target-box"></span> Bloco Destino</div>
+        <div class="status-bar">
+            <span>Inventário: <strong id="item-held">Vazio</strong></span>
         </div>
 
-        <button id="reset-btn" onclick="resetGame()">Reiniciar Bloco</button>
+        <div class="farm-scene">
+            <div class="clickable-element" id="shed" onclick="interact('shed')">
+                <span class="emoji">🛠️</span>
+                <span class="label">Galpão de Chaves</span>
+            </div>
+
+            <div class="clickable-element" id="gate" onclick="interact('gate')">
+                <span class="emoji" id="gate-emoji">🔒</span>
+                <span class="label" id="gate-label">Cerca Trancada</span>
+            </div>
+
+            <div class="clickable-element blocked" id="field" onclick="interact('field')">
+                <span class="emoji">🌱</span>
+                <span class="label">Área de Plantio</span>
+            </div>
+
+            <div class="clickable-element blocked" id="truck" onclick="interact('truck')">
+                <span class="emoji">🚛</span>
+                <span class="label">Caminhão de Saída</span>
+            </div>
+        </div>
+
+        <button id="reset-btn" onclick="resetGame()">Reiniciar Puzzle</button>
         <p id="message"></p>
     </div>
 
