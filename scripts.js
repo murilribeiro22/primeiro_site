@@ -1,50 +1,152 @@
-// A ordem correta dos IDs que o jogador deve clicar
-const correctOrder = [1, 2, 3];
-let playerOrder = [];
+// Mapa da Fazenda (5x5)
+// 0 = Vazio, X = Cerca (Bloqueado)
+const mapObstacles = [
+    [0, 0, 0, 0, 0],
+    [0, 'X', 'X', 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 'X', 'X', 0],
+    [0, 0, 0, 0, 0]
+];
 
-function waterPlant(element) {
-    // Se a planta já foi regada, não faz nada
-    if (element.classList.contains('watered')) return;
+// Posições fixas dos elementos no mapa (linha, coluna)
+const positions = {
+    hoe: { r: 0, c: 4 },
+    watercan: { r: 4, c: 0 },
+    gate: { r: 4, c: 4 }
+};
 
-    const plantId = parseInt(element.getAttribute('data-id'));
+let playerPos = { r: 0, c: 0 };
+let hasHoe = false;
+let hasWatercan = false;
+let gameOver = false;
+
+function initGame() {
+    playerPos = { r: 0, c: 0 };
+    hasHoe = false;
+    hasWatercan = false;
+    gameOver = false;
+    document.getElementById('message').innerText = "";
+    document.getElementById('inv-hoe').classList.add('grayed');
+    document.getElementById('inv-water').classList.add('grayed');
+    drawMap();
+}
+
+function drawMap() {
+    const grid = document.getElementById('farm-grid');
+    grid.innerHTML = '';
+
+    for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+
+            // Desenha com base no que está na célula
+            if (r === playerPos.r && c === playerPos.c) {
+                cell.innerText = '👨‍🌾'; // Fazendeiro se sobrepõe visualmente
+            } else if (mapObstacles[r][c] === 'X') {
+                cell.innerText = '🪵'; // Cerca
+                cell.classList.add('obstacle');
+            } else if (r === positions.hoe.r && c === positions.hoe.c && !hasHoe) {
+                cell.innerText = '⛏️';
+            } else if (r === positions.watercan.r && c === positions.watercan.c && !hasWatercan) {
+                cell.innerText = '💧';
+            } else if (r === positions.gate.r && c === positions.gate.c) {
+                cell.innerText = '🚧';
+            }
+
+            grid.appendChild(cell);
+        }
+    }
+}
+
+// Movimentação
+window.addEventListener('keydown', function(event) {
+    if (gameOver) return;
+
+    let targetR = playerPos.r;
+    let targetC = playerPos.c;
+    const key = event.key.toLowerCase();
+    let moved = false;
+
+    if (key === 'arrowup' || key === 'w') targetR--;
+    else if (key === 'arrowdown' || key === 's') targetR++;
+    else if (key === 'arrowleft' || key === 'a') targetC--;
+    else if (key === 'arrowright' || key === 'd') targetC++;
     
-    // Adiciona o ID do clique do jogador na lista
-    playerOrder.push(plantId);
-    
-    // Visualmente marca a planta como regada
-    element.classList.add('watered');
+    // Sistema de Interação (Barra de Espaço)
+    else if (event.key === ' ' || event.code === 'Space') {
+        event.preventDefault(); // Evita rolar a página
+        interact();
+        return;
+    } else {
+        return; // Ignora outras teclas
+    }
 
-    // Verifica se o clique atual foi correto
-    const currentStep = playerOrder.length - 1;
-    if (playerOrder[currentStep] !== correctOrder[currentStep]) {
-        document.getElementById('message').innerText = "❌ Ordem errada! A planta murchou. Tente de novo!";
-        document.getElementById('message').style.color = "#d32f2f";
-        disableAllPlots();
+    // Validação se o movimento está dentro do mapa e não bate na cerca
+    if (targetR >= 0 && targetR < 5 && targetC >= 0 && targetC < 5) {
+        if (mapObstacles[targetR][targetC] !== 'X') {
+            playerPos.r = targetR;
+            playerPos.c = targetC;
+            moved = true;
+        }
+    }
+
+    if (moved) {
+        drawMap();
+    }
+});
+
+// Lógica de Interação
+function interact() {
+    const msg = document.getElementById('message');
+
+    // Interagir com a Enxada
+    if (playerPos.r === positions.hoe.r && playerPos.c === positions.hoe.c && !hasHoe) {
+        hasHoe = true;
+        document.getElementById('inv-hoe').classList.remove('grayed');
+        msg.innerText = "⛏️ Você coletou a Enxada!";
+        msg.style.color = "#3e2723";
+        drawMap();
         return;
     }
 
-    // Se acertou a ordem e completou todas
-    if (playerOrder.length === correctOrder.length) {
-        document.getElementById('message').innerText = "🎉 Parabéns! Você resolveu o enigma e a colheita foi um sucesso! 🌾🍅🌻";
-        document.getElementById('message').style.color = "#388e3c";
+    // Interagir com o Regador
+    if (playerPos.r === positions.watercan.r && playerPos.c === positions.watercan.c && !hasWatercan) {
+        if (!hasHoe) {
+            msg.innerText = "❌ Ordem errada! Você precisa da Enxada para abrir caminho até o Regador!";
+            msg.style.color = "#d32f2f";
+            gameOver = true;
+        } else {
+            hasWatercan = true;
+            document.getElementById('inv-water').classList.remove('grayed');
+            msg.innerText = "💧 Você coletou o Regador! Vá para o portão.";
+            msg.style.color = "#3e2723";
+            drawMap();
+        }
+        return;
     }
-}
 
-function disableAllPlots() {
-    // Impede mais cliques adicionando a classe em tudo caso erre
-    const plots = document.querySelectorAll('.plot');
-    plots.forEach(plot => plot.style.pointerEvents = 'none');
+    // Interagir com o Portão
+    if (playerPos.r === positions.gate.r && playerPos.c === positions.gate.c) {
+        if (hasHoe && hasWatercan) {
+            msg.innerText = "🎉 Incrível! Você usou as ferramentas na ordem certa e liberou a fazenda!";
+            msg.style.color = "#388e3c";
+            gameOver = true;
+        } else {
+            msg.innerText = "🚧 O portão exige ferramentas específicas e interação em ordem para abrir!";
+            msg.style.color = "#d32f2f";
+        }
+        return;
+    }
+
+    // Clicou espaço no vazio
+    msg.innerText = "Nada aqui para interagir... 🤔";
+    msg.style.color = "#757575";
 }
 
 function resetGame() {
-    // Reseta a lógica do jogo
-    playerOrder = [];
-    document.getElementById('message').innerText = "";
-    
-    // Reseta o visual do cenário
-    const plots = document.querySelectorAll('.plot');
-    plots.forEach(plot => {
-        plot.classList.remove('watered');
-        plot.style.pointerEvents = 'auto';
-    });
+    initGame();
 }
+
+// Inicializa ao carregar
+initGame();
