@@ -3,19 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo Espacial - Movimento</title>
+    <title>Enigma da Fazenda</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="game-container">
+        <h1>Mini Fazenda: O Enigma da Rega</h1>
+        <p class="instructions">Descubra a ordem correta para regar as plantas (Dica: Da menor para a maior!).</p>
+        
+        <div class="farm-field">
+            <div class="plot" data-id="2" onclick="waterPlant(this)">
+                <span class="plant-icon">🌱</span>
+                <p>Tomate</p>
+            </div>
+            <div class="plot" data-id="1" onclick="waterPlant(this)">
+                <span class="plant-icon">🌿</span>
+                <p>Alface</p>
+            </div>
+            <div class="plot" data-id="3" onclick="waterPlant(this)">
+                <span class="plant-icon">🌻</span>
+                <p>Girassol</p>
+            </div>
+        </div>
 
-    <div id="painel">
-        <div id="instrucoes">Mova com as Setas ou WASD</div>
-        <div id="pontuacao">Pontos: <span id="pontos-valor">0</span></div>
-    </div>
-
-    <div id="cenario">
-        <div id="nave">🚀</div>
-        <div id="estrela">⭐</div>
+        <button id="reset-btn" onclick="resetGame()">Reiniciar Fazenda</button>
+        <p id="message"></p>
     </div>
 
     <script src="script.js"></script>
