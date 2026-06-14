@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fazenda Suprema: Movimento e Interação</title>
+    <title>Puzzle de Blocos: Fazenda</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
-        <h1>Fazenda: Movimento & Interação</h1>
-        <div class="controls-info">
-            <p>🏃 <b>Movimento:</b> Setas do Teclado ou WASD</p>
-            <p>🛑 <b>Interagir:</b> Barra de Espaço (Spacebar)</p>
+        <h1>Logística Agrícola: Movimento de Blocos</h1>
+        
+        <div class="status-panel">
+            <div>Movimentos: <span id="moves-display">0</span></div>
+            <div>Carga: <span id="cargo-display">Nenhuma</span></div>
         </div>
-        <p class="instructions"><b>Missão:</b> Vá até a Enxada (⛏️), aperte Espaço para coletar. Depois faça o mesmo com o Regador (💧) e abra o Portão (🚧)! Cuidado com as cercas (🪵).</p>
         
         <div id="farm-grid"></div>
 
-        <div class="inventory">
-            <span>Inventário: </span>
-            <span id="inv-hoe" class="inv-item grayed">⛏️ Enxada</span>
-            <span id="inv-water" class="inv-item grayed">💧 Regador</span>
+        <div class="legend">
+            <div><span class="box-legend player-box"></span> Bloco Trator</div>
+            <div><span class="box-legend seed-box"></span> Bloco Semente</div>
+            <div><span class="box-legend target-box"></span> Bloco Destino</div>
         </div>
 
-        <button id="reset-btn" onclick="resetGame()">Reiniciar Jogo</button>
+        <button id="reset-btn" onclick="resetGame()">Reiniciar Bloco</button>
         <p id="message"></p>
     </div>
 
